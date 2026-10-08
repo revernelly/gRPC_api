@@ -7,7 +7,10 @@ import (
 	pb "grpcapi/proto/gen"
 	"reflect"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func AddTeachersToDb(ctx context.Context, teacherFromReq []*pb.Teacher) ([]*pb.Teacher, error) {
@@ -38,6 +41,44 @@ func AddTeachersToDb(ctx context.Context, teacherFromReq []*pb.Teacher) ([]*pb.T
 		addedTeachers = append(addedTeachers, pbTeacher)
 	}
 	return addedTeachers, nil
+}
+
+func GetTeachersFromDb(ctx context.Context, sortOptions bson.D, filter bson.M) ([]*pb.Teacher, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Internal Error")
+	}
+	defer client.Disconnect(ctx)
+
+	coll := client.Database("school").Collection("teachers")
+	var cursor *mongo.Cursor
+	if len(sortOptions) < 1 {
+		cursor, err = coll.Find(ctx, filter)
+	} else {
+		cursor, err = coll.Find(ctx, filter, options.Find().SetSort(sortOptions))
+	}
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Internal Error")
+	}
+	defer cursor.Close(ctx)
+
+	var teachers []*pb.Teacher
+	for cursor.Next(ctx) {
+		var teacher models.Teacher
+		err := cursor.Decode(&teacher)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, "Internal Error")
+		}
+		teachers = append(teachers, &pb.Teacher{
+			Id:        teacher.Id,
+			FirstName: teacher.FirstName,
+			LastName:  teacher.LastName,
+			Email:     teacher.Email,
+			Class:     teacher.Class,
+			Subject:   teacher.Subject,
+		})
+	}
+	return teachers, nil
 }
 
 func mapModelTeacherToPb(teacher *models.Teacher) *pb.Teacher {
