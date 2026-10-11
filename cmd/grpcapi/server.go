@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"grpcapi/internals/api/handlers"
-	"grpcapi/internals/repositories/mongodb"
 	pb "grpcapi/proto/gen"
 
 	"github.com/joho/godotenv"
@@ -16,8 +15,6 @@ import (
 )
 
 func main() {
-
-	mongodb.CreateMongoClient()
 
 	err := godotenv.Load()
 	if err != nil {

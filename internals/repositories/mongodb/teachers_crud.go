@@ -7,6 +7,7 @@ import (
 	"grpcapi/internals/models"
 	"grpcapi/pkg/utils"
 	pb "grpcapi/proto/gen"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -117,4 +118,46 @@ func ModifyTeachersInDb(ctx context.Context, pbTeachers []*pb.Teacher) ([]*pb.Te
 		updatedTeachers = append(updatedTeachers, updatedTeacher)
 	}
 	return updatedTeachers, nil
+}
+
+func DeleteTeachersFromDb(ctx context.Context, teacherIdsToDelete []string) ([]string, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Internal error")
+	}
+	defer client.Disconnect(ctx)
+
+	objectIds := make([]primitive.ObjectID, len(teacherIdsToDelete))
+	for i, id := range teacherIdsToDelete {
+		// Check if the ID is blank
+		if strings.TrimSpace(id) == "" {
+			return nil, utils.ErrorHandler(
+				fmt.Errorf("teacher ID cannot be blank"),
+				"teacher ID cannot be blank",
+			)
+		}
+
+		// Convert Id to a mongoDB objectID
+		objectId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, fmt.Sprintf("incorrect id: %v", id))
+		}
+		objectIds[i] = objectId
+	}
+
+	filter := bson.M{"_id": bson.M{"$in": objectIds}}
+	result, err := client.Database("school").Collection("teachers").DeleteMany(ctx, filter)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "Internal Error")
+	}
+
+	if result.DeletedCount == 0 {
+		return nil, utils.ErrorHandler(err, "No teachers were deleted. ids/Entries do not exist.")
+	}
+
+	deletedIds := make([]string, result.DeletedCount)
+	for i, id := range objectIds {
+		deletedIds[i] = id.Hex()
+	}
+	return deletedIds, nil
 }
