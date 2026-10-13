@@ -171,3 +171,114 @@ func DeleteExecsFromDb(ctx context.Context, execIdsToDelete []string) ([]string,
 	}
 	return deletedIds, nil
 }
+
+func GetUserByUsername(ctx context.Context, username string) (*models.Exec, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "internal error")
+	}
+	defer client.Disconnect(ctx)
+
+	filter := bson.M{"username": username}
+	var exec models.Exec
+	err = client.Database("school").Collection("execs").FindOne(ctx, filter).Decode(&exec)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, utils.ErrorHandler(err, "user not found. Incorrect username/password")
+		}
+		return nil, utils.ErrorHandler(err, "internal error")
+	}
+	return &exec, nil
+}
+
+func UpdatePasswordInDb(ctx context.Context, req *pb.UpdatePasswordRequest) (string, string, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, "internal error")
+	}
+	defer client.Disconnect(ctx)
+
+	objId, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, "invalid Id")
+	}
+
+	var user models.Exec
+	err = client.Database("school").Collection("execs").FindOne(ctx, bson.M{"_id": objId}).Decode(&user)
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, "user not found")
+	}
+
+	err = utils.VerifyPassword(req.GetCurrentPassword(), user.Password)
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, "the password you entered does not match the password on file.")
+	}
+
+	hashedPassword, err := utils.HashPassword(req.GetNewPassword())
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, err.Error())
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"password":            hashedPassword,
+			"password_changed_at": time.Now().Format(time.RFC3339),
+		},
+	}
+
+	_, err = client.Database("school").Collection("execs").UpdateOne(ctx, bson.M{"_id": objId}, update)
+	if err != nil {
+		return "", "", utils.ErrorHandler(err, "failed to update the password")
+	}
+	return user.Username, user.Role, nil
+}
+
+func DeactivateUserInDb(ctx context.Context, ids []string) (*mongo.UpdateResult, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "internal error")
+	}
+	defer client.Disconnect(ctx)
+
+	var objectIds []primitive.ObjectID
+	for _, id := range ids {
+		objId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, "invalid Id")
+		}
+		objectIds = append(objectIds, objId)
+	}
+
+	filter := bson.M{"_id": bson.M{"$in": objectIds}}
+	update := bson.M{"$set": bson.M{"inactive_status": true}}
+	result, err := client.Database("school").Collection("execs").UpdateMany(ctx, filter, update)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "failed to deactivate users")
+	}
+	return result, nil
+}
+
+func ActivateUserInDb(ctx context.Context, ids []string) (*mongo.UpdateResult, error) {
+	client, err := CreateMongoClient()
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "internal error")
+	}
+	defer client.Disconnect(ctx)
+
+	var objectIds []primitive.ObjectID
+	for _, id := range ids {
+		objId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, utils.ErrorHandler(err, "invalid Id")
+		}
+		objectIds = append(objectIds, objId)
+	}
+
+	filter := bson.M{"_id": bson.M{"$in": objectIds}}
+	update := bson.M{"$set": bson.M{"inactive_status": false}}
+	result, err := client.Database("school").Collection("execs").UpdateMany(ctx, filter, update)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "failed to deactivate users")
+	}
+	return result, nil
+}

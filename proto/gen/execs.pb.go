@@ -902,7 +902,7 @@ const file_execs_proto_rawDesc = "" +
 	"\x0finactive_status\x18\f \x01(\bR\x0einactiveStatus\")\n" +
 	"\x05Execs\x12 \n" +
 	"\x05execs\x18\x01 \x03(\v2\n" +
-	".main.ExecR\x05execs2\xcc\x04\n" +
+	".main.ExecR\x05execs2\xff\x04\n" +
 	"\fExecsService\x12.\n" +
 	"\bGetExecs\x12\x15.main.GetExecsRequest\x1a\v.main.Execs\x12$\n" +
 	"\bAddExecs\x12\v.main.Execs\x1a\v.main.Execs\x12'\n" +
@@ -913,7 +913,8 @@ const file_execs_proto_rawDesc = "" +
 	"\x0eUpdatePassword\x12\x1b.main.UpdatePasswordRequest\x1a\x1c.main.UpdatePasswordResponse\x12?\n" +
 	"\rResetPassword\x12\x1a.main.ResetPasswordRequest\x1a\x12.main.Confirmation\x12K\n" +
 	"\x0eForgotPassword\x12\x1b.main.ForgotPasswordRequest\x1a\x1c.main.ForgotPasswordResponse\x123\n" +
-	"\x0eDeactivateUser\x12\r.main.ExecIds\x1a\x12.main.ConfirmationB\x16Z\x14/proto/gen;grpcapipbb\x06proto3"
+	"\x0eDeactivateUser\x12\r.main.ExecIds\x1a\x12.main.Confirmation\x121\n" +
+	"\fActivateUser\x12\r.main.ExecIds\x1a\x12.main.ConfirmationB\x16Z\x14/proto/gen;grpcapipbb\x06proto3"
 
 var (
 	file_execs_proto_rawDescOnce sync.Once
@@ -960,18 +961,20 @@ var file_execs_proto_depIdxs = []int32{
 	3,  // 10: main.ExecsService.ResetPassword:input_type -> main.ResetPasswordRequest
 	1,  // 11: main.ExecsService.ForgotPassword:input_type -> main.ForgotPasswordRequest
 	11, // 12: main.ExecsService.DeactivateUser:input_type -> main.ExecIds
-	14, // 13: main.ExecsService.GetExecs:output_type -> main.Execs
-	14, // 14: main.ExecsService.AddExecs:output_type -> main.Execs
-	14, // 15: main.ExecsService.UpdateExecs:output_type -> main.Execs
-	10, // 16: main.ExecsService.DeleteExecs:output_type -> main.DeleteExecsConfirmation
-	8,  // 17: main.ExecsService.Login:output_type -> main.ExecLoginResponse
-	6,  // 18: main.ExecsService.Logout:output_type -> main.ExecLogoutResponse
-	4,  // 19: main.ExecsService.UpdatePassword:output_type -> main.UpdatePasswordResponse
-	2,  // 20: main.ExecsService.ResetPassword:output_type -> main.Confirmation
-	0,  // 21: main.ExecsService.ForgotPassword:output_type -> main.ForgotPasswordResponse
-	2,  // 22: main.ExecsService.DeactivateUser:output_type -> main.Confirmation
-	13, // [13:23] is the sub-list for method output_type
-	3,  // [3:13] is the sub-list for method input_type
+	11, // 13: main.ExecsService.ActivateUser:input_type -> main.ExecIds
+	14, // 14: main.ExecsService.GetExecs:output_type -> main.Execs
+	14, // 15: main.ExecsService.AddExecs:output_type -> main.Execs
+	14, // 16: main.ExecsService.UpdateExecs:output_type -> main.Execs
+	10, // 17: main.ExecsService.DeleteExecs:output_type -> main.DeleteExecsConfirmation
+	8,  // 18: main.ExecsService.Login:output_type -> main.ExecLoginResponse
+	6,  // 19: main.ExecsService.Logout:output_type -> main.ExecLogoutResponse
+	4,  // 20: main.ExecsService.UpdatePassword:output_type -> main.UpdatePasswordResponse
+	2,  // 21: main.ExecsService.ResetPassword:output_type -> main.Confirmation
+	0,  // 22: main.ExecsService.ForgotPassword:output_type -> main.ForgotPasswordResponse
+	2,  // 23: main.ExecsService.DeactivateUser:output_type -> main.Confirmation
+	2,  // 24: main.ExecsService.ActivateUser:output_type -> main.Confirmation
+	14, // [14:25] is the sub-list for method output_type
+	3,  // [3:14] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name

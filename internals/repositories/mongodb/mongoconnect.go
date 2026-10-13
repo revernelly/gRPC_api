@@ -3,7 +3,6 @@ package mongodb
 import (
 	"context"
 	"grpcapi/pkg/utils"
-	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,6 +21,6 @@ func CreateMongoClient() (*mongo.Client, error) {
 		return nil, utils.ErrorHandler(err, "Unable to ping database")
 	}
 
-	log.Println("Connected to MongoDb")
+	// log.Println("Connected to MongoDb")
 	return client, nil
 }
