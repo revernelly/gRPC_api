@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"grpcapi/internals/models"
 	"grpcapi/internals/repositories/mongodb"
 	"grpcapi/pkg/utils"
@@ -131,5 +133,44 @@ func (s *Server) ActivateUser(ctx context.Context, req *pb.ExecIds) (*pb.Confirm
 
 	return &pb.Confirmation{
 		Confirmation: result.ModifiedCount > 0,
+	}, nil
+}
+
+func (s *Server) ForgotPassword(ctx context.Context, req *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+	email := req.GetEmail()
+
+	message, err := mongodb.ForgotPasswordDb(ctx, email)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.ForgotPasswordResponse{
+		Confirmation: true,
+		Message:      message,
+	}, nil
+}
+
+func (s *Server) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) (*pb.Confirmation, error) {
+	token := req.GetResetCode()
+
+	if req.GetNewPassword() != req.GetConfirmPassword() {
+		return nil, status.Error(codes.InvalidArgument, "Passwords do not match")
+	}
+
+	bytes, err := hex.DecodeString(token)
+	if err != nil {
+		return nil, utils.ErrorHandler(err, "internal error")
+	}
+
+	hashedToken := sha256.Sum256(bytes)
+	tokenInDb := hex.EncodeToString(hashedToken[:])
+
+	err = mongodb.ResetPasswordDb(ctx, tokenInDb, req.GetNewPassword())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.Confirmation{
+		Confirmation: true,
 	}, nil
 }
