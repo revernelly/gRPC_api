@@ -5,8 +5,10 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"grpcapi/internals/api/handlers"
+	"grpcapi/internals/api/interceptors"
 	pb "grpcapi/proto/gen"
 
 	"github.com/joho/godotenv"
@@ -21,7 +23,8 @@ func main() {
 		log.Fatal("Error loading .env file:", err)
 	}
 
-	s := grpc.NewServer()
+	rl := interceptors.NewRateLimiter(5, time.Minute)
+	s := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptors.ResponseTimeInterceptor, rl.RateLimitInterceptor))
 
 	pb.RegisterExecsServiceServer(s, &handlers.Server{})
 	pb.RegisterStudentsServiceServer(s, &handlers.Server{})
