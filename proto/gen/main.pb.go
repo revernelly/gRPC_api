@@ -7,6 +7,7 @@
 package grpcapipb
 
 import (
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -272,7 +273,9 @@ type Teacher struct {
 	FirstName string `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	// last_name must not contain special characters but can contain spaces
 	LastName string `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Email    string `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	// email must be a valid email address
+	// string email = 4;
+	Email string `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	// class must not contain special characters but can contain spaces
 	Class string `protobuf:"bytes,5,opt,name=class,proto3" json:"class,omitempty"`
 	// subject must not contain special characters but can contain spaces
@@ -402,30 +405,30 @@ var File_main_proto protoreflect.FileDescriptor
 const file_main_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"main.proto\x12\x04main\x1a\x0estudents.proto\"K\n" +
+	"main.proto\x12\x04main\x1a\x0estudents.proto\x1a\x17validate/validate.proto\"K\n" +
 	"\fStudentCount\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\bR\x06status\x12#\n" +
 	"\rstudent_count\x18\x02 \x01(\x05R\fstudentCount\"U\n" +
 	"\x1aDeleteTeachersConfirmation\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x1f\n" +
 	"\vdeleted_ids\x18\x02 \x03(\tR\n" +
-	"deletedIds\"\x1b\n" +
-	"\tTeacherId\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"/\n" +
+	"deletedIds\"9\n" +
+	"\tTeacherId\x12,\n" +
+	"\x02id\x18\x01 \x01(\tB\x1c\xfaB\x19r\x17\x10\x18\x18\x182\x11^[a-fA-F0-9]{24}$R\x02id\"9\n" +
 	"\n" +
-	"TeacherIds\x12!\n" +
-	"\x03ids\x18\x01 \x03(\v2\x0f.main.TeacherIdR\x03ids\"g\n" +
+	"TeacherIds\x12+\n" +
+	"\x03ids\x18\x01 \x03(\v2\x0f.main.TeacherIdB\b\xfaB\x05\x92\x01\x02\b\x01R\x03ids\"g\n" +
 	"\x12GetTeachersRequest\x12'\n" +
 	"\ateacher\x18\x01 \x01(\v2\r.main.TeacherR\ateacher\x12(\n" +
-	"\asort_by\x18\x02 \x03(\v2\x0f.main.SortFieldR\x06sortBy\"\x9b\x01\n" +
+	"\asort_by\x18\x02 \x03(\v2\x0f.main.SortFieldR\x06sortBy\"\xfe\x01\n" +
 	"\aTeacher\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x122\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
-	"\x05class\x18\x05 \x01(\tR\x05class\x12\x18\n" +
-	"\asubject\x18\x06 \x01(\tR\asubject\"5\n" +
+	"first_name\x18\x02 \x01(\tB\x13\xfaB\x10r\x0e2\f^[A-Za-z ]*$R\tfirstName\x120\n" +
+	"\tlast_name\x18\x03 \x01(\tB\x13\xfaB\x10r\x0e2\f^[A-Za-z ]*$R\blastName\x12\x1d\n" +
+	"\x05email\x18\x04 \x01(\tB\a\xfaB\x04r\x02`\x01R\x05email\x12,\n" +
+	"\x05class\x18\x05 \x01(\tB\x16\xfaB\x13r\x112\x0f^[A-Za-z0-9 ]*$R\x05class\x120\n" +
+	"\asubject\x18\x06 \x01(\tB\x16\xfaB\x13r\x112\x0f^[A-Za-z0-9 ]*$R\asubject\"5\n" +
 	"\bTeachers\x12)\n" +
 	"\bteachers\x18\x01 \x03(\v2\r.main.TeacherR\bteachers2\xf5\x02\n" +
 	"\x0fTeachersService\x127\n" +

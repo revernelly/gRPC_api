@@ -3,6 +3,7 @@ module grpcapi
 go 1.25.5
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/go-mail/mail/v2 v2.3.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
